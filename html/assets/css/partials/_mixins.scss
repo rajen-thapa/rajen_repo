@@ -1,0 +1,19 @@
+/* main: ../main.scss*/
+
+@mixin transition($v){
+  -webkit-transition: $v;
+  -moz-transition: $v;
+  transition: $v;
+}
+
+@mixin border-radius($v){
+  -webkit-border-radius: $v;
+  -moz-border-radius: $v;
+  border-radius: $v;
+}
+
+@mixin shadow($v){
+  -webkit-box-shadow: $v;
+  -moz-box-shadow: $v;
+  box-shadow: $v;
+}

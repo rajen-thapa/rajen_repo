@@ -1,0 +1,96 @@
+@import 'partials/colors';
+@import 'partials/mixin';
+
+$ticker: '.ticker';
+#{$ticker}{
+  background:lightgrey;
+  padding: 5px 20px;
+  overflow: hidden;
+
+  a{
+    color: $old_silver;
+  }
+
+  &__date{
+    float: left;
+    font:{
+      size: 12px;
+      weight: 400;
+    }
+    padding-right: 10px;
+    border-right: 1px solid $old_silver;
+    color: $dark_liver;
+  }
+
+  &__wrap{
+    overflow: hidden;
+
+    li{
+      float: left;
+
+    }
+  }
+
+  &__add{
+    float: right;
+    padding-left: 20px;
+
+    &--btn{
+      padding: 1px;
+      display: block;
+      width: 20px;
+      padding: 5px;
+      height: 20px;
+      line-height: 20px;
+      text-align: center;
+      background: $soap;
+      font-size: 10px;
+      color: $true_color;
+      cursor: pointer;
+      @include border-radius(50%);
+      @include transition(all 0.33s);
+
+      &:hover{
+        color: $old_silver;
+        background: $gainsboro;
+      }
+
+      i{
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 1;
+      }
+    }
+  }
+
+  &__container{
+    position: relative;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    font:{
+        family: 'Roboto', sans-serif!important;
+        size: 12px!important;
+    };
+  }
+
+  &__block{
+    margin-left: 10px;
+    font-weight: 500;
+    @include transition(all 0.33s);
+
+    &:hover{
+      color: $dark_liver;
+    }
+
+    &--percentage{
+      i{
+        font-size: 8px;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 1;
+      }
+    }
+  }
+}
