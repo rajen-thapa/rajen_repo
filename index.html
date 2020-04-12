@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Nepal Stock Exchange</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+  <link rel="stylesheet" href="https://unpkg.com/ngx-bootstrap/datepicker/bs-datepicker.css">
+  <!-- <link rel="stylesheet" href="assets/css/main.min.css"> -->
+<link rel="stylesheet" href="styles.d605916bb7c626cd6e81.css"></head>
+<body oncontextmenu="return false;">
+    <div class="preloader">
+        <div class="load">
+          <div class="load__wrap">
+            <div class="load__out">
+              <div class="load__in">
+                <span>NEPSE</span>
+              </div>
+            </div>
+
+            <span class="load__text">
+              Loading...
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="beta">
+          <a id="disclaim" style="cursor: pointer;">
+            <img src="assets/img/question.png" width="26" alt="Beta Disclaimer">
+            <span>Beta Disclaimer</span>
+          </a>
+          <div class="beta__disclaimer">
+            <h5>Beta Version Disclaimer</h5>
+            <p>Please note that this is a beta version of the this NEPSE web portal which is still undergoing final testing before its official release. The web portal, its software and all content found on it are provided on an “as is” and “as available” basis. This portal does not give any warranties, whether express or implied, as to the suitability or usability of the website, its software or any of its content.</p>
+            <p>This Nepse Website will not be liable for any loss, whether such loss is direct, indirect, special or consequential, suffered by any party as a result of their use of the this Nepse Website platform, its software or content. Any downloading or uploading of material to the website is done at the user’s own risk and the user will be solely responsible for any damage to any computer system or loss of data that results from such activities.</p>
+            <p>Should you encounter any bugs, glitches, lack of functionality or other problems on the website, please let us know so we can rectify these accordingly. Your help in this regard is greatly appreciated! You can write to us at this address support@nepalstock.com.np.</p>
+          </div>
+        </div>
+
+  <app-root>
+
+
+  </app-root>
+
+<script type="text/javascript" src="runtime.d69bfd9b4d9259585d4e.js"></script><script type="text/javascript" src="es2015-polyfills.6891f8d1f71fd7e6192d.js" nomodule></script><script type="text/javascript" src="polyfills.217d2cda12ccc5862acc.js"></script><script type="text/javascript" src="scripts.8df3af313e33c6619dc7.js"></script><script type="text/javascript" src="main.f697f3afe98fecb4ba6f.js"></script></body>
+<!-- <script>
+  window.onpopstate=function(){
+    if(document.getElementById("script3"))
+    document.getElementById("script3").remove();
+    var script3 = document.createElement("script");
+    script3.setAttribute("id", "script3");
+    script3.setAttribute("src", "../assets/js/slickCustom.js");
+    document.head.appendChild(script3);
+  }
+</script> -->
+<script>
+  // $(document).ready(function(){
+  //   $("#index__more").on('click', function(e){
+  //       e.preventDefault();
+  //       $('.index__chart').toggleClass('move');
+  //       $('.index__subindices').toggleClass('show');
+  //     });
+
+  //     $('.index__subindices--overlay').on('click', function(e){
+  //       $('.index__chart').removeClass('move');
+  //       $('.index__subindices').removeClass('show');
+  //     });
+
+    $("#disclaim").on('click', function(e){
+      $('.beta').toggleClass('show');
+    });
+  // });
+
+  (function(){
+      let loader = document.querySelector('.load');
+      loader.classList.add('hide')
+    })();
+
+  //   $(function () {
+  //       $('[data-toggle="tooltip"]').tooltip()
+  //     });
+
+</script>
+</html>
