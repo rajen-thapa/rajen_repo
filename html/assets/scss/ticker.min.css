@@ -1,0 +1,17 @@
+.ticker{background:lightgray;padding:5px 20px;overflow:hidden}
+/* .ticker a{color:#828282} */
+.ticker__date{float:left;font-size:12px;font-weight:400;padding-right:10px;border-right:1px solid #828282;color:#4f4f4f}
+.ticker__wrap{overflow:hidden}
+.ticker__wrap li{float:left}
+.ticker__add{float:right;padding-left:20px}
+.ticker__add--btn{padding:1px;display:block;width:20px;padding:5px;height:20px;line-height:20px;text-align:center;background:#cfdbee;font-size:10px;color:#0078d7;cursor:pointer;-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;-webkit-transition:all 0.33s;-moz-transition:all 0.33s;transition:all 0.33s}
+.ticker__add--btn:hover{color:#828282;background:#dbdbdb}
+.ticker__add--btn i{display:inline-block;vertical-align:middle;line-height:1}
+.ticker__container{position:relative;list-style-type:none;margin:0;padding:0;display:inline-block;font-family:"Roboto",sans-serif !important;font-size:12px !important}
+.ticker__block{margin-left:20px;
+    font-weight:600;
+    -webkit-transition:all 0.33s;-moz-transition:all 0.33s;transition:all 0.33s}
+.ticker__block:hover{color:#4f4f4f}
+.ticker__block--percentage i{font-size:8px;display:inline-block;vertical-align:middle;line-height:1}
+
+/*# sourceMappingURL=ticker.min.css.map */

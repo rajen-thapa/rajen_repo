@@ -1,0 +1,56 @@
+/*main: ../common.scss */
+
+h1, h2, h3, h4, h5, h6{
+  color: $dark_liver;
+  line-height: (32/20);
+}
+
+h1{
+  font:{
+    size: 20px;
+    weight: 400;
+  };
+  margin-bottom: 20px;
+}
+
+h2{
+  font:{
+    size: 20px;
+    weight: 400;
+  };
+  margin-bottom: 0;
+}
+
+h4{
+  font: {
+    size: 14px;
+    weight: 500;
+  };
+  margin-bottom: 0;
+}
+
+h5{
+  font: {
+    size: 14px;
+    weight: 500;
+  };
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+h6{
+  font:{
+    size: 16px;
+    weight: 500;
+  };
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+h6{
+  font:{
+    size: 14px;
+    weight: 500;
+  };
+  color: darken($gainsboro, 15%);
+}

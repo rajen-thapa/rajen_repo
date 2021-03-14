@@ -1,0 +1,13 @@
+/*main: ../common.scss*/
+$modal: ".modal";
+#{$modal}{
+
+  &-content{
+    border: none;
+    @include border-radius(0);
+  }
+
+  &-body{
+    padding: 30px;
+  }
+}

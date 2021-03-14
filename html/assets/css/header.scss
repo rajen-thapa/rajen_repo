@@ -1,0 +1,82 @@
+/*main: main.scss */
+
+@import 'partials/color';
+
+$header: '.header';
+#{$header}{
+  padding-top: 15px;
+
+  &__nav{
+    &--wrap{
+      li{
+        padding:{
+          left: 10px;
+          right: 10px;
+        };
+        border-right: 1px solid $main_color;
+
+        &:last-child{
+          padding-right: 0;
+          border: none;
+        }
+      }
+      a{
+        font:{
+          size: 12px;
+        };
+        display: block;
+        color: $main_color;
+      }
+    }
+  }
+
+  //Search
+  &__search{
+    &--box{
+      margin-top: 15px;
+      font:{
+        size: 14px;
+      };
+      border: 1px solid $border_color;
+      padding: 5px 10px;
+
+      input{
+        width: 280px;
+      }
+    }
+  }
+
+  //Header Top
+  &__top{
+    margin-bottom: 15px;
+  }
+}
+
+$nav: ".sitenav";
+#{$nav}{
+  background: $main_color;
+  padding: {
+    left: 10px;
+    right: 10px;
+  };
+
+  .nav-item{
+    & > a{
+      @include transition(0.33s all);
+
+      &:hover{
+        background: darken($main_color, 5%);
+      }
+    }
+  }
+
+  a{
+    color: #fff;
+  }
+
+  .dropdown-menu{
+    a{
+      color: $main_color;
+    }
+  }
+}
