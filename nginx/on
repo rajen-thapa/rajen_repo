@@ -1,0 +1,1 @@
+127.0.0.1 - - [06/Oct/2020:12:43:15 +0545] "GET /nginx_status HTTP/1.1" 403 153 "-" "nginx-amplify-agent/1.7.0-1"
