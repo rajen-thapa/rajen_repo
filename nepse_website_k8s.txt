@@ -1,0 +1,222 @@
+############# SCALING AND ORCHESTRATING WEBSITE CONTAINERS VIA KUBERNETES ####################
+
+1. Required packages
+	a. Kubeadm, Kubelet, Kubectl , docker.io
+
+2. Required files
+	a. service.yml
+	b. deployment.yml
+
+3. nginx_service_deployment.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-nginx
+  labels:
+    app: nginx
+spec:
+  type: NodePort
+  ports:
+  - nodePort: 30001
+    port: 80
+    protocol: TCP
+    targetPort: 80
+    name: http
+  - nodePort: 30002
+    port: 443
+    protocol: TCP
+    targetPort: 443
+    name: https
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 4
+  strategy:
+     type: RollingUpdate
+     rollingUpdate:
+         maxSurge: 25%
+         maxUnavailable: 25%
+  minReadySeconds: 5
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: infra-nginx
+        image: docker.io/ibanez6123/website-img:nx-v1
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+
+4. wildfly_service_deployment.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-wildfly
+  labels:
+    app: wildfly
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    nodePort: 30003
+    protocol: TCP
+    targetPort: 8080
+    name: http
+  - port: 9990
+    nodePort: 30004
+    protocol: TCP
+    targetPort: 9990
+    name: https
+  selector:
+    app: wildfly
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-wildfly
+  labels:
+    app: wildfly
+spec:
+  replicas: 2
+  strategy:
+     type: RollingUpdate
+     rollingUpdate:
+         maxSurge: 2
+         maxUnavailable: 1
+  minReadySeconds: 5
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: wildfly
+  template:
+    metadata:
+      labels:
+        app: wildfly
+    spec:
+      containers:
+      - name: infra-wildfly
+        image: docker.io/ibanez6123/website-img:wf-v1
+        ports:
+        - containerPort: 8080
+        - containerPort: 9990
+
+5. redis_service_deployment.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-redis
+  labels:
+    app: reis
+spec:
+  type: NodePort
+  ports:
+  - nodePort: 30006
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-redis
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  strategy:
+     type: RollingUpdate
+     rollingUpdate:
+         maxSurge: 2
+         maxUnavailable: 0
+  minReadySeconds: 5
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: website-redis
+        image: docker.io/ibanez6123/website-img:redis-v1
+        ports:
+        - containerPort: 6379
+        
+6. cacheschedular_service_deployment.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-scheular
+  labels:
+    app: cacheschedular
+spec:
+  type: NodePort
+  ports:
+  - nodePort: 30005
+    port: 8070
+    protocol: TCP
+    targetPort: 8070
+  selector:
+    app: cacheschedular
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-schedular
+  labels:
+    app: cacheschedular
+spec:
+  replicas: 1
+  strategy:
+     type: RollingUpdate
+     rollingUpdate:
+         maxSurge: 2
+         maxUnavailable: 0
+  minReadySeconds: 5
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: cacheschedular
+  template:
+    metadata:
+      labels:
+        app: cacheschedular
+    spec:
+      containers:
+      - name: web-schedular
+        image: docker.io/ibanez6123/website-img:cs-v1
+        ports:
+        - containerPort: 8070
+
+7. To deploy the containers run the following command
+	$ kubectl create -f nginx_service_deployment.yml
+	$ kubectl create -f wildfly_service_deployment.yml
+	$ kubectl create -f cs_service_deployment.yml
+	$ kubectl create -f redis_service_deployment.yml
+
+8. Use the following command to view the running pods and services
+	$ kubectl get pods
+	$ kubectl get services
+
+9. Note that images are pulled from dockerhub during pods deployment

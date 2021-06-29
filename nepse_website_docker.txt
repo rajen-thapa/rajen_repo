@@ -1,0 +1,246 @@
+############# DEPLOYING NEPSE WEBSITE IN DOCKER CONTAINERS ################
+
+1. Package required:
+	a.Docker Daemon
+	b.Docker-compose
+ 
+2. Containers 
+	a.Wildfly
+	b.Nginx
+	c.Redis
+	d.Cache Schedular
+
+3. ***** Nginx Dockerfile *******
+
+FROM nginx:latest
+USER root
+RUN apt-get update && \
+    apt-get install -y iputils-ping && \
+    apt-get install -y vim && \
+    apt-get install -y telnet
+WORKDIR /usr/share/
+RUN rm -rf /usr/share/nginx/html
+COPY ./ /usr/share/nginx/
+WORKDIR /etc/nginx/
+RUN rm -rf nginx.conf
+ADD https://raw.githubusercontent.com/rajen-thapa/rajen_repo/master/nginx/dhparam.pem /etc/nginx/
+ADD https://raw.githubusercontent.com/rajen-thapa/rajen_repo/master/nginx/mime.types /etc/nginx/
+ADD https://raw.githubusercontent.com/rajen-thapa/rajen_repo/master/nginx/nginx.conf /etc/nginx/
+RUN mkdir -p /etc/letsencrypt/live/nepse-web-stage.yco.com.np/
+ADD https://raw.githubusercontent.com/rajen-thapa/rajen_repo/master/letsencrypt/live/nepse-web-stage.yco.com.np/privkey.pem /etc/letsencrypt/live/nepse-web-stage.yco.com.np/
+ADD https://raw.githubusercontent.com/rajen-thapa/rajen_repo/master/letsencrypt/live/nepse-web-stage.yco.com.np/fullchain.pem /etc/letsencrypt/live/nepse-web-stage.yco.com.np/
+WORKDIR /
+CMD ["nginx", "-g", "daemon off;"]
+
+
+
+4. ****** WildFly Dockerfile ***********
+
+FROM jboss/wildfly:latest
+
+# Appserver
+ARG WILDFLY_USER
+ARG WILDFLY_PASS
+
+# Database
+ARG DB_NAME
+ARG DB_USER
+ARG DB_PASS
+ARG JNDI
+ARG DB_URI
+ENV JBOSS_HOME /opt/jboss/wildfly
+ENV JBOSS_CLI /opt/jboss/wildfly/bin/jboss-cli.sh
+ENV DEPLOYMENT_DIR /opt/jboss/wildfly/standalone/deployments/
+
+# Setting up WildFly Admin Console
+RUN echo "=> Adding WildFly administrator"
+RUN $JBOSS_HOME/bin/add-user.sh -u $WILDFLY_USER -p $WILDFLY_PASS --silent
+
+############# CREATING REQUIRED DIRECTORIES FOR WILDFLY ###############
+WORKDIR /
+USER root
+RUN mkdir -p u00/uploads && \
+    chmod 777 u00/uploads && \
+    mkdir -p share/nepse-website && \
+    chmod 777 -R share/nepse-website && \
+    mkdir -p home/website && \
+    chmod 777 -R home/website && \
+    mkdir -p jar_folder && \
+    chmod 766 -R jar_folder && \
+COPY ./file/ /jar_folder
+RUN cp /jar_folder/mssql-jdbc-6.4.0.jre8.jar $DEPLOYMENT_DIR/mssql-jdbc-6.4.0.jre8.jar && \
+    cp /jar_folder/mssql-jdbc-6.4.0.jre8.jar /tmp/mssql-jdbc-6.4.0.jre8.jar
+WORKDIR /opt/jboss/wildfly/standalone/log
+RUN touch /opt/jboss/wildfly/standalone/log/audit.log && \
+    chmod 777 -R /opt/jboss/wildfly/standalone/log/audit.log
+
+# Configure Wildfly server
+RUN echo "=> Starting WildFly server" && \
+      bash -c '$JBOSS_HOME/bin/standalone.sh &' && \
+    echo "=> Waiting for the server to boot" && \
+      bash -c 'until `$JBOSS_CLI -c ":read-attribute(name=server-state)" 2> /dev/null | grep -q running`; do echo `$JBOSS_CLI -c ":read-attribute(name=server-state)" 2> /dev/null`; sleep 1; done' && \
+    echo "=> Adding MSSQL module" && \
+      $JBOSS_CLI --connect --command="module add --name=com.mssql --resources=/tmp/mssql-jdbc-6.4.0.jre8.jar --dependencies=javax.api,javax.transaction.api" && \
+    echo "=> Adding MSSQL driver" && \
+       $JBOSS_CLI --connect --command="/subsystem=datasources/jdbc-driver=mssql:add(driver-name="mssql",driver-module-name="com.mssql",driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver)" && \
+    echo "=> Creating a new datasource" && \
+    $JBOSS_CLI --connect --command="data-source add \
+	    --name=$DB_NAME \
+	    --jndi-name=java:/$JNDI \
+	    --user-name=$DB_USER \
+	    --password=$DB_PASS \
+      --driver-name=mssql-jdbc-6.4.0.jre8.jar \
+	    --connection-url=jdbc:sqlserver://$DB_URI;DatabaseName=$DB_NAME \
+	    --use-ccm=false \
+      --max-pool-size=250 \
+      --blocking-timeout-wait-millis=5000 \
+      --enabled=true" && \
+    echo "=> Shutting down WildFly and Cleaning up" && \
+      $JBOSS_CLI --connect --command=":shutdown" && \
+      rm -rf $JBOSS_HOME/standalone/configuration/standalone_xml_history/ $JBOSS_HOME/standalone/log/* && \
+      rm -f /tmp/*.jar
+
+# Expose http and admin ports
+EXPOSE 8080 9990
+WORKDIR /
+RUN cp /jar_folder/nepse-website.war /opt/jboss/wildfly/standalone/deployments/nepse-website.war
+#echo "=> Restarting WildFly"
+# Set the default command to run on boot
+# This will boot WildFly in the standalone mode and bind to all interfaces
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
+
+
+5. ******* Redis Dockerfile *************
+
+FROM redis:latest
+USER root
+WORKDIR /usr/local/etc/
+RUN mkdir -p redis
+RUN chmod 766 -R /usr/local/etc/redis/
+COPY ./redis.conf redis/
+CMD ["redis-server", "/usr/local/etc/redis/redis.conf"]
+
+6. ******** Cache-Shecular Dockerfile ********
+
+FROM openjdk:12
+USER root
+WORKDIR /opt/
+RUN mkdir app
+COPY . /opt/app/
+CMD ["java", "-jar", "/opt/app/nepse-website-cache-scheduler-0.0.1-SNAPSHOT.jar"]
+
+6. ***** docker-compose-yml file ***********
+
+version: "3.1"
+services:
+     cacheserver:
+         build:
+            context: ./redis
+            dockerfile: Dockerfile
+         image: web_redis:ver1
+         container_name: website_redis
+         ports:
+            - 6379:6379
+         networks:
+            my-network:
+               ipv4_address: 172.16.1.4
+         restart: always
+
+     schedular:
+         build:
+            context: ./springboot
+            dockerfile: Dockerfile
+         image: web_schedular:ver1
+         container_name: web_schedular
+         ports:
+            - 8070:8070
+         networks:
+            my-network:
+               ipv4_address: 172.16.1.5
+         restart: always
+
+     appserver:
+         container_name: website_wildfly
+         image: web_wildfly:ver1
+         build:
+            context: ./wildfly
+            dockerfile: Dockerfile
+            args:
+              DB_NAME: "${db_name}"
+              DB_USER: "${db_user}"
+              DB_PASS: "${db_pass}"
+	      JNDI: "${jndi}"
+              WILDFLY_USER: "${user}"
+              WILDFLY_PASS: "${password}"
+              DB_URI: "${db_uri}"
+         ports:
+            - 8080:8080
+            - 9990:9990
+         #environment:
+            #DB_NAME: "${db_name}"
+            #DB_USER: "${db_user}"
+            #DB_PASS: "${db_pass}"
+            #JNDI: "${jndi}"
+            #DB_URI: "${db_uri}"
+            #WILDFLY_USER: "${user}"
+            #WILDFLY_PASS: "${password}"
+         #volumes:
+            #- /opt/wildfly/standalone/log/server.log:/opt/jboss/wildfly/standalone/log/server.log
+         networks:
+            my-network:
+               ipv4_address: 172.16.1.2
+         restart: always
+
+     webserver:
+         build:
+            context: ./nginx
+            dockerfile: Dockerfile
+         image: web_nginx:ver1
+         container_name: website_nginx
+	 ports:
+            - 80:80
+            - 443:443
+         #volumes:
+            #- /etc/letsencrypt:/etc/letsencrypt
+            #- /etc/nginx:/etc/nginx
+            #- /var/log/nginx:/var/log/nginx
+            #- /usr/share/nginx/html:/usr/share/nginx/html
+         networks:
+            my-network:
+               ipv4_address: 172.16.1.3
+         restart: always
+
+networks:
+   my-network:
+      driver: bridge
+      ipam:
+         config:
+           - subnet: 172.16.1.0/24
+             gateway: 172.16.1.1
+
+7. .env file
+	db_name=NepseWebsite
+	db_user=wf_user
+	db_pass=Wf_Us3r!@#
+	jndi=NEPSE-WEBSITE
+	user=admin
+	password=admin
+	db_uri=192.168.21.2
+
+
+8. Command to build and run the container
+	$ docker-compose up --build -d
+
+9. Use the follwing command to view the images and running containers
+	$ docker images
+	$ docker ps
+
+10. Once containers are up push the images into the docker hub
+	a. $ docker login (Provide dockerhub username and passowrd)
+	b. $ docker tag soucre-image destination-image
+	c. $ docker push image:tag-id
+	d. Check the repository for new pushed images
+
+
+
+
